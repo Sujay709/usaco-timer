@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>USACO log</title>
+  <meta name="theme-color" content="#100e1a">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='%238f9bff' stroke-width='7'/%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='%23ff9ec4' stroke-width='7' stroke-dasharray='80 200' stroke-linecap='round' transform='rotate(-90 32 32)'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Outfit:wght@200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-phase="focus">
+  <main>
+    <header class="top">
+      <h1>USACO hours</h1>
+      <p id="subtitle">Start a session, end it, and it lands in your total.</p>
+    </header>
+
+    <section class="stage">
+      <!-- TIMER -->
+      <div class="timer-card" aria-label="Timer">
+        <div class="seg" role="tablist" aria-label="Timer mode">
+          <button id="mode-pomodoro" role="tab" type="button">Pomodoro</button>
+          <button id="mode-free" role="tab" type="button">Free timer</button>
+        </div>
+
+        <div class="ring-wrap">
+          <svg class="ring" viewBox="0 0 240 240" aria-hidden="true">
+            <defs>
+              <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" class="stop-a"/>
+                <stop offset="100%" class="stop-b"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-track" cx="120" cy="120" r="108"/>
+            <circle id="ring-progress" class="ring-progress" cx="120" cy="120" r="108" stroke="url(#grad)"/>
+          </svg>
+          <div class="ring-center">
+            <div id="digits" class="digits" role="timer" aria-live="off">25:00</div>
+            <div id="phase-label" class="phase-label">Focus</div>
+            <div id="dots" class="dots" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="btn-main" class="btn primary" type="button">Start</button>
+          <button id="btn-end" class="btn ghost" type="button" hidden>End and log</button>
+        </div>
+
+        <div class="meta-inputs">
+          <label class="field">
+            <span>Division</span>
+            <select id="tag">
+              <option>Bronze</option>
+              <option>Silver</option>
+              <option>Gold</option>
+              <option>Platinum</option>
+              <option>Review</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label class="field grow">
+            <span>What are you working on</span>
+            <input id="note" type="text" maxlength="120" placeholder="Problem name or topic" autocomplete="off">
+          </label>
+        </div>
+
+        <details class="settings">
+          <summary>Timer settings</summary>
+          <div class="settings-grid">
+            <label class="field"><span>Focus (min)</span><input id="set-focus" type="number" min="1" max="180"></label>
+            <label class="field"><span>Short break</span><input id="set-short" type="number" min="1" max="60"></label>
+            <label class="field"><span>Long break</span><input id="set-long" type="number" min="1" max="90"></label>
+            <label class="field"><span>Long break every</span><input id="set-every" type="number" min="2" max="10"></label>
+          </div>
+          <div class="toggles">
+            <label class="check"><input id="set-sound" type="checkbox"> Play a chime when a phase ends</label>
+            <label class="check"><input id="set-auto" type="checkbox"> Start breaks automatically</label>
+          </div>
+        </details>
+      </div>
+
+      <!-- STATS -->
+      <aside class="stats" aria-label="Totals">
+        <div class="total">
+          <div class="total-num"><span id="total-hours">0.0</span><small>hours</small></div>
+          <div id="total-sub" class="total-sub">No sessions yet</div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat"><b id="stat-today">0m</b><span>Today</span></div>
+          <div class="stat"><b id="stat-week">0m</b><span>This week</span></div>
+          <div class="stat"><b id="stat-streak">0</b><span>Day streak</span></div>
+        </div>
+
+        <div class="chart-block">
+          <div class="chart-title">Last 14 days</div>
+          <div id="chart" class="chart" role="img" aria-label="Bar chart of minutes logged per day for the last 14 days"></div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- HISTORY -->
+    <section class="history" aria-label="History">
+      <div class="history-head">
+        <h2>History</h2>
+        <div class="tools">
+          <button id="btn-export" class="link" type="button">Export backup</button>
+          <button id="btn-csv" class="link" type="button">Export CSV</button>
+          <button id="btn-import" class="link" type="button">Import backup</button>
+          <input id="file-import" type="file" accept="application/json,.json" hidden>
+        </div>
+      </div>
+
+      <details class="manual">
+        <summary>Add a past session by hand</summary>
+        <form id="manual-form" class="manual-grid" autocomplete="off">
+          <label class="field"><span>Date</span><input id="m-date" type="date" required></label>
+          <label class="field"><span>Minutes</span><input id="m-min" type="number" min="1" max="720" required></label>
+          <label class="field"><span>Division</span>
+            <select id="m-tag">
+              <option>Bronze</option><option>Silver</option><option>Gold</option><option>Platinum</option><option>Review</option><option>Other</option>
+            </select>
+          </label>
+          <label class="field grow"><span>Note</span><input id="m-note" type="text" maxlength="120"></label>
+          <button class="btn small" type="submit">Add session</button>
+        </form>
+      </details>
+
+      <div id="history-list" class="history-list"></div>
+
+      <div class="foot">
+        <span>Your data lives in this browser only. Export a backup now and then.</span>
+        <button id="btn-clear" class="link danger" type="button">Delete all history</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
